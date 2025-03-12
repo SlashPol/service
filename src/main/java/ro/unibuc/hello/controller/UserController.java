@@ -24,10 +24,4 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
     }
-
-    @GetMapping("/{email}")
-    public ResponseEntity<UserEntity> getUserByEmail(@PathVariable String email) {
-        UserEntity user = userService.getUserByEmail(email);
-        return ResponseEntity.ok(user);
-    }
 }
