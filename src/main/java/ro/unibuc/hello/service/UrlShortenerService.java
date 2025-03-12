@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service;
 import ro.unibuc.hello.data.ShortUrlEntity;
 import ro.unibuc.hello.data.ShortUrlRepository;
 import ro.unibuc.hello.util.ShortUrlGenerator;
+import ro.unibuc.hello.util.Tracking;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -14,6 +16,8 @@ public class UrlShortenerService {
     private ShortUrlRepository shortUrlRepository;
     @Autowired
     private ShortUrlGenerator shortUrlGenerator;
+    @Autowired
+    private Tracking tracking;
 
     public String createShortUrl(String originalUrl){
         Optional<ShortUrlEntity> existingLink = Optional.ofNullable(shortUrlRepository.findByOriginalUrl(originalUrl));
@@ -22,6 +26,7 @@ public class UrlShortenerService {
         }
         ShortUrlEntity newShortUrl = new ShortUrlEntity();
         newShortUrl.setOriginalUrl(originalUrl);
+        newShortUrl.setExpirationDate(LocalDateTime.now().plusMonths(1L));
         newShortUrl = shortUrlRepository.save(newShortUrl);
 
         String shortUrl = shortUrlGenerator.getShortUrl();
@@ -34,9 +39,11 @@ public class UrlShortenerService {
     }
 
     public String getOriginalUrl(String shortUrl){
-        return Optional.ofNullable(shortUrlRepository.findByShortenedUrl(shortUrl))
+        String originalUrl = Optional.ofNullable(shortUrlRepository.findByShortenedUrl(shortUrl))
                 .map(ShortUrlEntity::getOriginalUrl)
                 .orElseThrow(() -> new RuntimeException("URL not found"));
+        tracking.incrementVisits(shortUrl);
+        return originalUrl;
     }
 
 }

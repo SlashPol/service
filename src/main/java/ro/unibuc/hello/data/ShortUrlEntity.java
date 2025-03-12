@@ -20,5 +20,7 @@ public class ShortUrlEntity
     private String originalUrl;
     private String shortenedUrl;
     private final LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime expirationDate;
+    private Long totalVisits = 0L;
     // TBA: creator user id
 }
