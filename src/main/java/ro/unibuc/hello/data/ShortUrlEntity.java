@@ -22,5 +22,5 @@ public class ShortUrlEntity
     private final LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime expirationDate;
     private Long totalVisits = 0L;
-    // TBA: creator user id
+    private String creatorUserId;
 }

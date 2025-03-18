@@ -22,7 +22,7 @@ public class UrlShortenerService {
     @Autowired
     private Tracking tracking;
 
-    public String createShortUrl(String originalUrl, LocalDateTime expiresAt){
+    public String createShortUrl(String originalUrl, LocalDateTime expiresAt, String userId){
         Optional<ShortUrlEntity> existingLink = Optional.ofNullable(shortUrlRepository.findByOriginalUrl(originalUrl));
         if(existingLink.isPresent()){
             return existingLink.get().getShortenedUrl();
@@ -35,13 +35,13 @@ public class UrlShortenerService {
         ShortUrlEntity newShortUrl = new ShortUrlEntity();
         newShortUrl.setOriginalUrl(originalUrl);
         newShortUrl.setExpirationDate(Objects.requireNonNullElseGet(expiresAt, () -> LocalDateTime.now().plusMonths(1L)));
+        newShortUrl.setCreatorUserId(userId);
         newShortUrl = shortUrlRepository.save(newShortUrl);
 
         String shortUrl = shortUrlGenerator.getShortUrl();
 
         newShortUrl.setShortenedUrl(shortUrl);
 
-        // TBA: creator user id
         shortUrlRepository.save(newShortUrl);
         return shortUrl;
     }
@@ -52,13 +52,19 @@ public class UrlShortenerService {
         return originalUrl;
     }
 
-    public void deleteShortUrl(String shortUrl){
+    public void deleteShortUrl(String shortUrl, String userId){
         ShortUrlEntity shortUrlEntity = findShortUrl(shortUrl);
+        if(!shortUrlEntity.getCreatorUserId().equals(userId)){
+            throw new RuntimeException("You are not allowed to delete this URL");
+        }
         shortUrlRepository.delete(shortUrlEntity);
     }
 
-    public UrlStats getUrlStats(String shortUrl){
+    public UrlStats getUrlStats(String shortUrl, String userId){
         ShortUrlEntity shortUrlEntity = findShortUrl(shortUrl);
+        if(!shortUrlEntity.getCreatorUserId().equals(userId)){
+            throw new RuntimeException("You are not allowed to view this URL's stats");
+        }
         return UrlStats.builder()
                 .shortUrl(shortUrl)
                 .totalVisits(shortUrlEntity.getTotalVisits())
