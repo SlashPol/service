@@ -17,7 +17,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<UserEntity> registerUser(@RequestBody User user) {
         try {
-            UserEntity newEntity = userService.registerUser(user.username, user.email, user.password);
+            UserEntity newEntity = userService.registerUser(user);
             return ResponseEntity.ok(newEntity);
         } catch (Exception e) {
             System.err.println(e.getMessage());
