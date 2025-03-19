@@ -15,6 +15,7 @@ import ro.unibuc.hello.service.UrlShortenerService;
 import ro.unibuc.hello.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Controller
 public class UrlController {
@@ -34,7 +35,7 @@ public class UrlController {
         String username = authentication.getName();
         String userId = userService.getUserByUsername(username).getId();
 
-        logger.debug(urlRequest.getOriginalUrl() + urlRequest.getExpiresAt().toString());
+        logger.debug(urlRequest.getOriginalUrl() + Objects.toString(urlRequest.getExpiresAt(), "Default expiration date"));
 
         return ResponseEntity.ok(urlShortenerService.createShortUrl(urlRequest, userId));
     }
