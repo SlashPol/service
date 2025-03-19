@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ro.unibuc.hello.data.UserEntity;
 import ro.unibuc.hello.data.UserRepository;
+import ro.unibuc.hello.dto.User;
 import ro.unibuc.hello.exception.UserAlreadyExistsException;
 
 @Service
@@ -16,8 +17,11 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UserEntity registerUser(String username, String email, String password)
+    public UserEntity registerUser(User newUser)
     {
+        String username = newUser.getUsername();
+        String email = newUser.getEmail();
+        String password = newUser.getPassword();
         if (userRepository.existsByUsername(username)) {
             throw new UserAlreadyExistsException(UserAlreadyExistsException.SameCredentials.USERNAME);
         }

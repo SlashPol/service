@@ -1,5 +1,7 @@
 package ro.unibuc.hello.controller;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import ro.unibuc.hello.dto.UrlRequest;
 import ro.unibuc.hello.dto.UrlStats;
 import ro.unibuc.hello.service.UrlShortenerService;
 import ro.unibuc.hello.service.UserService;
@@ -22,15 +25,18 @@ public class UrlController {
     @Autowired
     private UserService userService;
 
+    private static final Logger logger = LoggerFactory.getLogger(UrlController.class);
+
     @PostMapping("/api/urls/createShortUrl")
     @ResponseBody
-    public ResponseEntity<String> createShortUrl(@RequestBody String originalUrl,
-                                                 @RequestParam(required = false)LocalDateTime expiresAt){
+    public ResponseEntity<String> createShortUrl(@RequestBody UrlRequest urlRequest){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         String userId = userService.getUserByUsername(username).getId();
 
-        return ResponseEntity.ok(urlShortenerService.createShortUrl(originalUrl, expiresAt, userId));
+        logger.debug(urlRequest.getOriginalUrl() + urlRequest.getExpiresAt().toString());
+
+        return ResponseEntity.ok(urlShortenerService.createShortUrl(urlRequest, userId));
     }
 
     @GetMapping("/{shortUrl}")

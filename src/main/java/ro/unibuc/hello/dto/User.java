@@ -1,9 +1,12 @@
 package ro.unibuc.hello.dto;
 
+import lombok.Data;
+
+@Data
 public class User {
-    public String username;
-    public String email;
-    public String password;
+    private String username;
+    private String email;
+    private String password;
 
     public User() {
     }

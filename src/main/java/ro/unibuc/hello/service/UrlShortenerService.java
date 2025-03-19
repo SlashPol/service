@@ -1,10 +1,13 @@
 package ro.unibuc.hello.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ro.unibuc.hello.data.ShortUrlEntity;
 import ro.unibuc.hello.data.ShortUrlRepository;
+import ro.unibuc.hello.dto.UrlRequest;
 import ro.unibuc.hello.dto.UrlStats;
 import ro.unibuc.hello.util.ShortUrlGenerator;
 import ro.unibuc.hello.util.Tracking;
@@ -14,6 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@EnableScheduling
 public class UrlShortenerService {
     @Autowired
     private ShortUrlRepository shortUrlRepository;
@@ -22,7 +26,14 @@ public class UrlShortenerService {
     @Autowired
     private Tracking tracking;
 
-    public String createShortUrl(String originalUrl, LocalDateTime expiresAt, String userId){
+    public String createShortUrl(UrlRequest urlRequest, String userId){
+        String originalUrl = urlRequest.getOriginalUrl();
+        LocalDateTime expiresAt = urlRequest.getExpiresAt();
+
+        if(originalUrl == null){
+            throw new IllegalArgumentException("Url must not be empty");
+        }
+
         Optional<ShortUrlEntity> existingLink = Optional.ofNullable(shortUrlRepository.findByOriginalUrl(originalUrl));
         if(existingLink.isPresent()){
             return existingLink.get().getShortenedUrl();
