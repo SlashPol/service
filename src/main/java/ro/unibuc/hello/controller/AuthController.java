@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import ro.unibuc.hello.dto.User;
 import ro.unibuc.hello.service.UserService;
 import ro.unibuc.hello.utils.JwtUtil;
@@ -32,14 +35,19 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody User loginRequest) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
-        );
+    public ResponseEntity<?> login(@RequestBody User loginRequest) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+            );
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
-        String token = jwtUtil.generateToken(userDetails.getUsername());
+            UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
+            String token = jwtUtil.generateToken(userDetails.getUsername());
 
-        return Map.of("token", token);
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid username or password"));
+        }
     }
 }

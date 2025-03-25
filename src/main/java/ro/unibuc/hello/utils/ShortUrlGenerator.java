@@ -1,4 +1,4 @@
-package ro.unibuc.hello.util;
+package ro.unibuc.hello.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

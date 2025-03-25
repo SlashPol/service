@@ -1,11 +1,9 @@
-package ro.unibuc.hello.util;
+package ro.unibuc.hello.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ro.unibuc.hello.data.ShortUrlEntity;
 import ro.unibuc.hello.data.ShortUrlRepository;
-
-import java.util.Optional;
 
 @Component
 public class Tracking {

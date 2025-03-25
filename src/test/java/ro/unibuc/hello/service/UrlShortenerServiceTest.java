@@ -13,8 +13,8 @@ import ro.unibuc.hello.data.ShortUrlRepository;
 import ro.unibuc.hello.dto.UrlRequest;
 import ro.unibuc.hello.exception.NoPermissionException;
 import ro.unibuc.hello.exception.ShortUrlNotFoundException;
-import ro.unibuc.hello.util.ShortUrlGenerator;
-import ro.unibuc.hello.util.Tracking;
+import ro.unibuc.hello.utils.ShortUrlGenerator;
+import ro.unibuc.hello.utils.Tracking;
 
 import java.time.LocalDateTime;
 
