@@ -30,7 +30,7 @@ public class UrlController {
 
     @PostMapping("/api/urls/createShortUrl")
     @ResponseBody
-    public ResponseEntity<String> createShortUrl(@RequestBody UrlRequest urlRequest){
+    public ResponseEntity<String> createShortUrl(@RequestBody UrlRequest urlRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         String userId = userService.getUserByUsername(username).getId();
@@ -42,45 +42,33 @@ public class UrlController {
 
     @GetMapping("/{shortUrl}")
     @ResponseBody
-    public ResponseEntity<String> getOriginalUrl(@PathVariable String shortUrl){
+    public ResponseEntity<String> getOriginalUrl(@PathVariable String shortUrl) {
         try {
             return ResponseEntity.ok(urlShortenerService.getOriginalUrl(shortUrl));
-        }
-        catch (Exception ex){
+        } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
     }
 
     @DeleteMapping("/api/urls/delete/{shortUrl}")
     @ResponseBody
-    public ResponseEntity<String> deleteShortUrl(@PathVariable String shortUrl){
-        try{
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
-            String userId = userService.getUserByUsername(username).getId();
+    public ResponseEntity<String> deleteShortUrl(@PathVariable String shortUrl) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        String userId = userService.getUserByUsername(username).getId();
 
-            urlShortenerService.deleteShortUrl(shortUrl, userId);
-            return ResponseEntity.status(HttpStatus.OK).body("Url deleted successfully");
-        }
-        catch (Exception ex){
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
-        // TODO: custom exception for bad user @radubig
+        urlShortenerService.deleteShortUrl(shortUrl, userId);
+        return ResponseEntity.status(HttpStatus.OK).body("Url deleted successfully");
     }
 
     @GetMapping("/api/urls/getStats/{shortUrl}")
     @ResponseBody
-    public ResponseEntity<UrlStats> getStats(@PathVariable String shortUrl){
-        try{
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String username = authentication.getName();
-            String userId = userService.getUserByUsername(username).getId();
+    public ResponseEntity<UrlStats> getStats(@PathVariable String shortUrl) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        String userId = userService.getUserByUsername(username).getId();
 
-            UrlStats urlStats = urlShortenerService.getUrlStats(shortUrl, userId);
-            return ResponseEntity.ok(urlStats);
-        }
-        catch (Exception ex){
-            return ResponseEntity.notFound().build();
-        }
+        UrlStats urlStats = urlShortenerService.getUrlStats(shortUrl, userId);
+        return ResponseEntity.ok(urlStats);
     }
 }

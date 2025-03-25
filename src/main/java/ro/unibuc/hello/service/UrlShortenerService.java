@@ -4,11 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import ro.unibuc.hello.data.ShortUrlEntity;
 import ro.unibuc.hello.data.ShortUrlRepository;
 import ro.unibuc.hello.dto.UrlRequest;
 import ro.unibuc.hello.dto.UrlStats;
+import ro.unibuc.hello.exception.NoPermissionException;
+import ro.unibuc.hello.exception.ShortUrlNotFoundException;
 import ro.unibuc.hello.util.ShortUrlGenerator;
 import ro.unibuc.hello.util.Tracking;
 
@@ -65,8 +68,9 @@ public class UrlShortenerService {
 
     public void deleteShortUrl(String shortUrl, String userId){
         ShortUrlEntity shortUrlEntity = findShortUrl(shortUrl);
+
         if(!shortUrlEntity.getCreatorUserId().equals(userId)){
-            throw new RuntimeException("You are not allowed to delete this URL");
+            throw new NoPermissionException("You are not allowed to delete this URL");
         }
         shortUrlRepository.delete(shortUrlEntity);
     }
@@ -74,7 +78,7 @@ public class UrlShortenerService {
     public UrlStats getUrlStats(String shortUrl, String userId){
         ShortUrlEntity shortUrlEntity = findShortUrl(shortUrl);
         if(!shortUrlEntity.getCreatorUserId().equals(userId)){
-            throw new RuntimeException("You are not allowed to view this URL's stats");
+            throw new NoPermissionException("You are not allowed to view this URL's stats");
         }
         return UrlStats.builder()
                 .shortUrl(shortUrl)
@@ -89,7 +93,7 @@ public class UrlShortenerService {
 
     private ShortUrlEntity findShortUrl(String shortUrl){
         return Optional.ofNullable(shortUrlRepository.findByShortenedUrl(shortUrl))
-                .orElseThrow(() -> new RuntimeException("URL not found"));
+                .orElseThrow(() -> new ShortUrlNotFoundException(shortUrl));
     }
 
 }
