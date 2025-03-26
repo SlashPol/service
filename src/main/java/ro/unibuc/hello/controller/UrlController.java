@@ -43,11 +43,7 @@ public class UrlController {
     @GetMapping("/{shortUrl}")
     @ResponseBody
     public ResponseEntity<String> getOriginalUrl(@PathVariable String shortUrl) {
-        try {
-            return ResponseEntity.ok(urlShortenerService.getOriginalUrl(shortUrl));
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+        return ResponseEntity.ok(urlShortenerService.getOriginalUrl(shortUrl));
     }
 
     @DeleteMapping("/api/urls/delete/{shortUrl}")

@@ -16,8 +16,10 @@ import ro.unibuc.hello.exception.ShortUrlNotFoundException;
 import ro.unibuc.hello.utils.ShortUrlGenerator;
 import ro.unibuc.hello.utils.Tracking;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
@@ -116,6 +118,30 @@ public class UrlShortenerServiceTest {
 
         assertNotNull(exception);
         assertEquals("You are not allowed to view this URL's stats", exception.getMessage());
+    }
+
+    @Test
+    void testCreateNewShortUrl(){
+        UrlRequest newUrlRequest = new UrlRequest("test.com", LocalDateTime.parse("2025-08-08T12:00:00"));
+        String userId = "abc";
+        String generatedShortUrl = "abcdef";
+        when(shortUrlRepository.findByShortenedUrl(mockShortUrl.getShortenedUrl()))
+                .thenReturn(null);
+        when(shortUrlRepository.findByOriginalUrl(newUrlRequest.getOriginalUrl()))
+                .thenReturn(null);
+        when(shortUrlGenerator.getShortUrl())
+                .thenReturn(generatedShortUrl);
+
+        ShortUrlEntity createdShortUrl = new ShortUrlEntity();
+        createdShortUrl.setOriginalUrl(newUrlRequest.getOriginalUrl());
+        createdShortUrl.setExpirationDate(newUrlRequest.getExpiresAt());
+        createdShortUrl.setCreatorUserId(userId);
+
+        when(shortUrlRepository.save(any()))
+                .thenReturn(createdShortUrl);
+
+        String newShortUrl = urlShortenerService.createShortUrl(newUrlRequest, userId);
+        assertEquals(generatedShortUrl, newShortUrl);
     }
 
 }
