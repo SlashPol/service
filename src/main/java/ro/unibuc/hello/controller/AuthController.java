@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import ro.unibuc.hello.dto.User;
-import ro.unibuc.hello.service.UserService;
 import ro.unibuc.hello.utils.JwtUtil;
 
 import java.util.Map;
@@ -30,9 +29,6 @@ public class AuthController {
 
     @Autowired
     private UserDetailsService userDetailsService;
-
-    @Autowired
-    private UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User loginRequest) {

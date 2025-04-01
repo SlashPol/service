@@ -39,6 +39,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable) // Allow registration without CSRF protection
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/auth/login", "/api/user/register").permitAll()
+                    .requestMatchers("/api/greet/greetings", "/api/greet/greetings/{id}", "/api/greet/info", "/api/greet/hello-world").permitAll()
                     .requestMatchers("/api/**").authenticated()
                     .anyRequest().permitAll()
             )

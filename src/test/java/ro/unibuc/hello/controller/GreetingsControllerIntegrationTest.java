@@ -75,7 +75,7 @@ public class GreetingsControllerIntegrationTest {
 
     @Test
     public void testGetAllGreetings() throws Exception {
-        mockMvc.perform(get("/greetings"))
+        mockMvc.perform(get("/api/greet/greetings"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.length()").value(2))
@@ -87,7 +87,7 @@ public class GreetingsControllerIntegrationTest {
     public void testCreateGreeting() throws Exception {
         Greeting greeting = new Greeting("3", "Hello New");
 
-        mockMvc.perform(post("/greetings")
+        mockMvc.perform(post("/api/greet/greetings")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(greeting)))
                 .andExpect(status().isOk())
@@ -95,7 +95,7 @@ public class GreetingsControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").value("3"))
                 .andExpect(jsonPath("$.content").value("Hello New"));
 
-        mockMvc.perform(get("/greetings"))
+        mockMvc.perform(get("/api/greet/greetings"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(3));
@@ -105,7 +105,7 @@ public class GreetingsControllerIntegrationTest {
     public void testUpdateGreeting() throws Exception {
         Greeting greeting = new Greeting("1", "Hello Updated");
 
-        mockMvc.perform(put("/greetings/1")
+        mockMvc.perform(put("/api/greet/greetings/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(greeting)))
                 .andExpect(status().isOk())
@@ -113,7 +113,7 @@ public class GreetingsControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").value("1"))
                 .andExpect(jsonPath("$.content").value("Hello Updated"));
 
-        mockMvc.perform(get("/greetings"))
+        mockMvc.perform(get("/api/greet/greetings"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(2))
@@ -124,10 +124,10 @@ public class GreetingsControllerIntegrationTest {
     @Test
     public void testDeleteGreeting() throws Exception {
 
-        mockMvc.perform(delete("/greetings/1"))
+        mockMvc.perform(delete("/api/greet/greetings/1"))
             .andExpect(status().isOk());
 
-        mockMvc.perform(get("/greetings"))
+        mockMvc.perform(get("/api/greet/greetings"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(1))
