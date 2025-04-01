@@ -45,7 +45,7 @@ class GreetingsControllerTest {
         when(greetingsService.hello("there")).thenReturn(greeting);
     
         // Act & Assert
-        mockMvc.perform(get("/hello-world?name=there"))
+        mockMvc.perform(get("/api/greet/hello-world?name=there"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.id").value("1"))
                .andExpect(jsonPath("$.content").value("Hello, there!"));
@@ -59,7 +59,7 @@ class GreetingsControllerTest {
         when(greetingsService.buildGreetingFromInfo("there")).thenReturn(greeting);
     
         // Act & Assert
-        mockMvc.perform(get("/info?title=there"))
+        mockMvc.perform(get("/api/greet/info?title=there"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.id").value("1"))
                .andExpect(jsonPath("$.content").value("there : some description"));
@@ -88,7 +88,7 @@ class GreetingsControllerTest {
         when(greetingsService.getAllGreetings()).thenReturn(greetings);
 
         // Act & Assert
-        mockMvc.perform(get("/greetings"))
+        mockMvc.perform(get("/api/greet/greetings"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value("1"))
             .andExpect(jsonPath("$[0].content").value("Hello"))
@@ -103,7 +103,7 @@ class GreetingsControllerTest {
         when(greetingsService.saveGreeting(any(Greeting.class))).thenReturn(newGreeting);
     
         // Act & Assert
-        mockMvc.perform(post("/greetings")
+        mockMvc.perform(post("/api/greet/greetings")
                .content("{\"content\":\"Hello, World!\"}")
                .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
@@ -119,7 +119,7 @@ class GreetingsControllerTest {
         when(greetingsService.updateGreeting(eq(id), any(Greeting.class))).thenReturn(updatedGreeting);
     
         // Act & Assert
-        mockMvc.perform(put("/greetings/{id}", id)
+        mockMvc.perform(put("/api/greet/greetings/{id}", id)
                .content("{\"content\":\"Updated Greeting\"}")
                .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
@@ -134,19 +134,19 @@ class GreetingsControllerTest {
         when(greetingsService.saveGreeting(any(Greeting.class))).thenReturn(greeting);
     
         // add greeting
-        mockMvc.perform(post("/greetings")
+        mockMvc.perform(post("/api/greet/greetings")
                .content("{\"content\":\"Hello\"}")
                .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk());
     
         // delete greeting
-        mockMvc.perform(delete("/greetings/{id}", id))
+        mockMvc.perform(delete("/api/greet/greetings/{id}", id))
                .andExpect(status().isOk());
     
         verify(greetingsService, times(1)).deleteGreeting(id);
     
         // check if greeting is deleted
-        mockMvc.perform(get("/greetings"))
+        mockMvc.perform(get("/api/greet/greetings"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$").isEmpty());
     }
