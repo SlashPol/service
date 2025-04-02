@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+            tools {
+                jdk 'jdk21' // This name must match the JDK installation name used in Jenkins Global Tool Configuration
+            }
+    }
     environment {
         DOCKER_PASSWORD = credentials("docker_password")
     }
@@ -23,7 +27,4 @@ pipeline {
         }
     }
 
-        tools {
-            jdk 'jdk21' // This name must match the JDK installation name used in Jenkins Global Tool Configuration
-        }
 }
