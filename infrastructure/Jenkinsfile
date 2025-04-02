@@ -17,6 +17,9 @@ pipeline {
             }
         }
         stage('Tag image') {
+              tools {
+               jdk 'jdk21' // This name must match the JDK installation name used in Jenkins Global Tool Configuration
+              }
               steps {
                 script {
                     GIT_TAG = sh([script: 'git fetch --tag && git tag', returnStdout: true]).trim()
