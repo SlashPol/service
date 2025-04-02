@@ -1,11 +1,17 @@
 pipeline {
     agent any
+            tools {
+                   jdk 'jdk21' // This name must match the JDK installation name used in Jenkins Global Tool Configuration
+            }
     environment {
         DOCKER_PASSWORD = credentials("docker_password")
     }
 
     stages {
         stage('Build & Test') {
+        tools {
+            jdk 'jdk21' // This name must match the JDK installation name used in Jenkins Global Tool Configuration
+        }
             steps {
                 sh './gradlew clean build'
             }
@@ -23,7 +29,4 @@ pipeline {
         }
     }
 
-        tools {
-            jdk 'jdk21' // This name must match the JDK installation name used in Jenkins Global Tool Configuration
-        }
 }
