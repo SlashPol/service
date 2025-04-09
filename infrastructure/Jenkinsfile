@@ -30,14 +30,18 @@ pipeline {
                     env.IMAGE_TAG = "${env.MAJOR_VERSION}.\$((${env.MINOR_VERSION} + 1)).${env.PATCH_VERSION}"
                 }
                 sh "docker build -t drgprodeng/hello-img:${env.IMAGE_TAG} ."
+                sh "git tag ${env.IMAGE_TAG}"
+                sh "git push https://$GITHUB_TOKEN@github.com/${DOCKER_PASSWORD_USR}/service.git ${env.IMAGE_TAG}"
               }
         }
+        /*
         stage ('Push to DockerHub') {
             steps{
                 sh "git tag ${env.IMAGE_TAG}"
                 sh "git push https://$GITHUB_TOKEN@github.com/${DOCKER_PASSWORD_USR}/service.git ${env.IMAGE_TAG}"
             }
         }
+        */
         stage('Image'){
             steps{
                 script{
