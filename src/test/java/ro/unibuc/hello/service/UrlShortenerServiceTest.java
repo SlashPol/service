@@ -1,5 +1,6 @@
 package ro.unibuc.hello.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +33,8 @@ public class UrlShortenerServiceTest {
     private ShortUrlGenerator shortUrlGenerator;
     @Mock
     private Tracking tracking;
+    @Mock
+    private MeterRegistry meterRegistry;
     @InjectMocks
     private UrlShortenerService urlShortenerService;
     private ShortUrlEntity mockShortUrl = new ShortUrlEntity();
