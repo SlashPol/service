@@ -1,5 +1,9 @@
 package ro.unibuc.hello.service;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,40 +31,64 @@ public class UrlShortenerService {
     @Autowired
     private Tracking tracking;
 
+    @Autowired
+    private MeterRegistry registry;
+    private final Counter shortUrlCreationCounter;
+    private final Counter shortUrlAccessCounter;
+    private final DistributionSummary deletedUrlSummary;
+
+    public UrlShortenerService() {
+        this.shortUrlCreationCounter = registry.counter("short.urls.created");
+        this.shortUrlAccessCounter = registry.counter("short.urls.accessed");
+        this.deletedUrlSummary = DistributionSummary
+                .builder("expired.urls.deleted")
+                .description("Amount of expired short URLs")
+                .baseUnit("urls")
+                .register(registry);
+    }
+
     public String createShortUrl(UrlRequest urlRequest, String userId){
-        String originalUrl = urlRequest.getOriginalUrl();
-        LocalDateTime expiresAt = urlRequest.getExpiresAt();
+        Timer.Sample sample = Timer.start(registry);
+        try {
+            String originalUrl = urlRequest.getOriginalUrl();
+            LocalDateTime expiresAt = urlRequest.getExpiresAt();
 
-        if(originalUrl == null){
-            throw new IllegalArgumentException("Url must not be empty");
+            if (originalUrl == null) {
+                throw new IllegalArgumentException("Url must not be empty");
+            }
+
+            Optional<ShortUrlEntity> existingLink = Optional.ofNullable(shortUrlRepository.findByOriginalUrl(originalUrl));
+            if (existingLink.isPresent()) {
+                return existingLink.get().getShortenedUrl();
+            }
+
+            if (expiresAt != null && expiresAt.isBefore(LocalDateTime.now())) {
+                throw new IllegalArgumentException("Expiration date must be in the future");
+            }
+
+            ShortUrlEntity newShortUrl = new ShortUrlEntity();
+            newShortUrl.setOriginalUrl(originalUrl);
+            newShortUrl.setExpirationDate(Objects.requireNonNullElseGet(expiresAt, () -> LocalDateTime.now().plusMonths(1L)));
+            newShortUrl.setCreatorUserId(userId);
+            newShortUrl = shortUrlRepository.save(newShortUrl);
+
+            String shortUrl = shortUrlGenerator.getShortUrl();
+
+            newShortUrl.setShortenedUrl(shortUrl);
+
+            shortUrlRepository.save(newShortUrl);
+            shortUrlCreationCounter.increment();
+            return shortUrl;
         }
-
-        Optional<ShortUrlEntity> existingLink = Optional.ofNullable(shortUrlRepository.findByOriginalUrl(originalUrl));
-        if(existingLink.isPresent()){
-            return existingLink.get().getShortenedUrl();
+        finally {
+            sample.stop(registry.timer("create.url.duration"));
         }
-
-        if(expiresAt != null && expiresAt.isBefore(LocalDateTime.now())){
-            throw new IllegalArgumentException("Expiration date must be in the future");
-        }
-
-        ShortUrlEntity newShortUrl = new ShortUrlEntity();
-        newShortUrl.setOriginalUrl(originalUrl);
-        newShortUrl.setExpirationDate(Objects.requireNonNullElseGet(expiresAt, () -> LocalDateTime.now().plusMonths(1L)));
-        newShortUrl.setCreatorUserId(userId);
-        newShortUrl = shortUrlRepository.save(newShortUrl);
-
-        String shortUrl = shortUrlGenerator.getShortUrl();
-
-        newShortUrl.setShortenedUrl(shortUrl);
-
-        shortUrlRepository.save(newShortUrl);
-        return shortUrl;
     }
 
     public String getOriginalUrl(String shortUrl){
         String originalUrl = findShortUrl(shortUrl).getOriginalUrl();
         tracking.incrementVisits(shortUrl);
+        shortUrlAccessCounter.increment();
         return originalUrl;
     }
 
@@ -86,7 +114,8 @@ public class UrlShortenerService {
 
     @Scheduled(fixedRate = 60000)
     public void deleteExpiredUrls(){
-        shortUrlRepository.deleteByExpirationDateBefore(LocalDateTime.now());
+        int deletedAmount = shortUrlRepository.deleteByExpirationDateBefore(LocalDateTime.now());
+        deletedUrlSummary.record(deletedAmount);
     }
 
     private ShortUrlEntity findShortUrl(String shortUrl){
