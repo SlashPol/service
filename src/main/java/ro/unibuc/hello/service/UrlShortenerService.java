@@ -31,20 +31,20 @@ public class UrlShortenerService {
     @Autowired
     private Tracking tracking;
 
-    @Autowired
-    private MeterRegistry registry;
+    private final MeterRegistry registry;
     private final Counter shortUrlCreationCounter;
     private final Counter shortUrlAccessCounter;
     private final DistributionSummary deletedUrlSummary;
 
-    public UrlShortenerService() {
-        this.shortUrlCreationCounter = registry.counter("short.urls.created");
-        this.shortUrlAccessCounter = registry.counter("short.urls.accessed");
+    public UrlShortenerService(MeterRegistry meterRegistry) {
+        this.registry = meterRegistry;
+        this.shortUrlCreationCounter = meterRegistry.counter("short.urls.created");
+        this.shortUrlAccessCounter = meterRegistry.counter("short.urls.accessed");
         this.deletedUrlSummary = DistributionSummary
                 .builder("expired.urls.deleted")
                 .description("Amount of expired short URLs")
                 .baseUnit("urls")
-                .register(registry);
+                .register(meterRegistry);
     }
 
     public String createShortUrl(UrlRequest urlRequest, String userId){
