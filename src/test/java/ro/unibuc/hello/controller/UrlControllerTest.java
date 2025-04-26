@@ -78,7 +78,7 @@ public class UrlControllerTest {
         urlRequest.setOriginalUrl("https://example.com");
         urlRequest.setExpiresAt(LocalDateTime.now().plusDays(7));
 
-        when(urlShortenerService.createShortUrl(any(UrlRequest.class), eq("user123"), false))
+        when(urlShortenerService.createShortUrl(any(UrlRequest.class), eq("user123"), any()))
             .thenReturn("abc123");
 
         // Act & Assert
@@ -88,7 +88,7 @@ public class UrlControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("abc123"));
 
-        verify(urlShortenerService).createShortUrl(any(UrlRequest.class), eq("user123"), false);
+        verify(urlShortenerService).createShortUrl(any(UrlRequest.class), eq("user123"), any());
     }
 
     @Test
