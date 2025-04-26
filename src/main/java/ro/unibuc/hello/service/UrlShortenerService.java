@@ -47,8 +47,11 @@ public class UrlShortenerService {
                 .register(meterRegistry);
     }
 
-    public String createShortUrl(UrlRequest urlRequest, String userId){
-        Timer.Sample sample = Timer.start(registry);
+    public String createShortUrl(UrlRequest urlRequest, String userId, boolean withMonitoring){
+        Timer.Sample sample = null;
+        if(withMonitoring) {
+            sample = Timer.start(registry);
+        }
         try {
             String originalUrl = urlRequest.getOriginalUrl();
             LocalDateTime expiresAt = urlRequest.getExpiresAt();
@@ -77,18 +80,18 @@ public class UrlShortenerService {
             newShortUrl.setShortenedUrl(shortUrl);
 
             shortUrlRepository.save(newShortUrl);
-            shortUrlCreationCounter.increment();
+            if(withMonitoring) shortUrlCreationCounter.increment();
             return shortUrl;
         }
         finally {
-            sample.stop(registry.timer("create.url.duration"));
+            if(withMonitoring) sample.stop(registry.timer("create.url.duration"));
         }
     }
 
-    public String getOriginalUrl(String shortUrl){
+    public String getOriginalUrl(String shortUrl, boolean withMonitoring){
         String originalUrl = findShortUrl(shortUrl).getOriginalUrl();
         tracking.incrementVisits(shortUrl);
-        shortUrlAccessCounter.increment();
+        if(withMonitoring) shortUrlAccessCounter.increment();
         return originalUrl;
     }
 

@@ -1,6 +1,7 @@
 package ro.unibuc.hello.service;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,9 +22,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 public class UrlShortenerServiceTest {
@@ -56,7 +56,7 @@ public class UrlShortenerServiceTest {
         UrlRequest urlRequest = new UrlRequest(originalUrl, null);
         when(shortUrlRepository.findByOriginalUrl(originalUrl)).thenReturn(mockShortUrl);
 
-        String shortUrl = urlShortenerService.createShortUrl(urlRequest, "abc");
+        String shortUrl = urlShortenerService.createShortUrl(urlRequest, "abc", false);
 
         assertEquals(shortUrl, mockShortUrl.getShortenedUrl());
     }
@@ -66,7 +66,7 @@ public class UrlShortenerServiceTest {
         String originalUrl = "www.test.com";
         UrlRequest urlRequest = new UrlRequest(originalUrl, LocalDateTime.now().minusSeconds(5));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                urlShortenerService.createShortUrl(urlRequest, "abc"));
+                urlShortenerService.createShortUrl(urlRequest, "abc", false));
         assertEquals("Expiration date must be in the future", exception.getMessage());
     }
 
@@ -74,7 +74,7 @@ public class UrlShortenerServiceTest {
     void testRequestNullUrl() {
         UrlRequest urlRequest = new UrlRequest(null, LocalDateTime.now().plusDays(16));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                urlShortenerService.createShortUrl(urlRequest, "abc"));
+                urlShortenerService.createShortUrl(urlRequest, "abc", false));
         assertEquals("Url must not be empty", exception.getMessage());
     }
 
@@ -84,7 +84,7 @@ public class UrlShortenerServiceTest {
                 .thenReturn(mockShortUrl);
 
         doNothing().when(tracking).incrementVisits(mockShortUrl.getShortenedUrl());
-        String originalUrl = urlShortenerService.getOriginalUrl(mockShortUrl.getShortenedUrl());
+        String originalUrl = urlShortenerService.getOriginalUrl(mockShortUrl.getShortenedUrl(), false);
 
         assertEquals(mockShortUrl.getOriginalUrl(), originalUrl);
     }
@@ -143,7 +143,7 @@ public class UrlShortenerServiceTest {
         when(shortUrlRepository.save(any()))
                 .thenReturn(createdShortUrl);
 
-        String newShortUrl = urlShortenerService.createShortUrl(newUrlRequest, userId);
+        String newShortUrl = urlShortenerService.createShortUrl(newUrlRequest, userId, false);
         assertEquals(generatedShortUrl, newShortUrl);
     }
 
