@@ -2,7 +2,7 @@ groups:
   - name: AppAlerts
     rules:
       - alert: CRITICAL-NonResponsive
-        expr: rate(get_url_duration_seconds_bucket{le="2.0"}[10s] / rate(get_url_duration_seconds_count[10s]))
+        expr: rate(get_url_duration_seconds_bucket{le="2.0"}[10s] / rate(get_url_duration_seconds_count[10s])) < 0.9
         for: 2s
         labels:
           severity: critical
