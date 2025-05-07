@@ -89,10 +89,19 @@ public class UrlShortenerService {
     }
 
     public String getOriginalUrl(String shortUrl, boolean withMonitoring){
-        String originalUrl = findShortUrl(shortUrl).getOriginalUrl();
-        tracking.incrementVisits(shortUrl);
-        if(withMonitoring) shortUrlAccessCounter.increment();
-        return originalUrl;
+        Timer.Sample sample = null;
+        if(withMonitoring) {
+            sample = Timer.start(registry);
+        }
+        try {
+            String originalUrl = findShortUrl(shortUrl).getOriginalUrl();
+            tracking.incrementVisits(shortUrl);
+            if (withMonitoring) shortUrlAccessCounter.increment();
+            return originalUrl;
+        }
+        finally {
+            if(withMonitoring) sample.stop(registry.timer("get.url.duration", "operation", "getOriginalUrl"));
+        }
     }
 
     public void deleteShortUrl(String shortUrl, String userId){
