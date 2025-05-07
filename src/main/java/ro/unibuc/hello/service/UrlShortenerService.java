@@ -84,7 +84,7 @@ public class UrlShortenerService {
             return shortUrl;
         }
         finally {
-            if(withMonitoring) sample.stop(registry.timer("create.url.duration"));
+            if(withMonitoring) sample.stop(registry.timer("create.url.duration", "operation", "createShortUrl"));
         }
     }
 
