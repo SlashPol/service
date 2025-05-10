@@ -37,13 +37,13 @@ public class UrlController {
 
         logger.debug(urlRequest.getOriginalUrl() + Objects.toString(urlRequest.getExpiresAt(), "Default expiration date"));
 
-        return ResponseEntity.ok(urlShortenerService.createShortUrl(urlRequest, userId));
+        return ResponseEntity.ok(urlShortenerService.createShortUrl(urlRequest, userId, true));
     }
 
     @GetMapping("/{shortUrl}")
     @ResponseBody
     public ResponseEntity<String> getOriginalUrl(@PathVariable String shortUrl) {
-        return ResponseEntity.ok(urlShortenerService.getOriginalUrl(shortUrl));
+        return ResponseEntity.ok(urlShortenerService.getOriginalUrl(shortUrl, true));
     }
 
     @DeleteMapping("/api/urls/delete/{shortUrl}")

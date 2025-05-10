@@ -1,6 +1,24 @@
 groups:
   - name: AppAlerts
     rules:
+      - alert: CRITICAL-NonResponsive
+        expr: rate(get_url_duration_seconds_bucket{le="2.0"}[10s]) / rate(get_url_duration_seconds_count[10s])) < 0.9
+        for: 2s
+        labels:
+          severity: critical
+        annotations:
+          summary: Application is not available
+          description: "Url get method latency is too high"
+
+      - alert: CRITICAL-TooManyLinks
+        expr: changes(short_urls_accessed_total[5m]) > 1
+        for: 1s
+        labels:
+          severity: critical
+        annotations:
+          summary: Too many accesses on short URLs {{$value}}
+          description: "short URLs have been accessed too many times"
+      
       - alert: WARNING-HighThroughput
         expr: rate(hello_info_count_total[1m]) > 10
         for: 10s
